@@ -33,6 +33,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvException;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     private Paint mFaceLandmardkPaint2;
     private static final String TAG = "Debug";
     private CameraBridgeViewBase mOpenCvCameraView;
+    private FaceDet faceDet = new FaceDet(Constants.getFaceShapeModelPath());
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -94,20 +96,19 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         mFaceLandmardkPaint2.setColor(Color.RED);
         mFaceLandmardkPaint2.setStrokeWidth(2);
         mFaceLandmardkPaint2.setStyle(Paint.Style.STROKE);
+
+
     }
 
     private void getLandmarks(){
         Log.d(TAG, "getLandmarks");
-        FaceDet faceDet = new FaceDet(Constants.getFaceShapeModelPath());
-        Log.d(TAG,"path " + Constants.getFaceShapeModelPath());
 
-        if (!new File(Constants.getFaceShapeModelPath()).exists()) {
-            copyFileFromRawToOthers(this, R.raw.shape_predictor_68_face_landmarks, Constants.getFaceShapeModelPath());
-        }
-        Log.d(TAG,"path2 " + Constants.getFaceShapeModelPath());
+        //Log.d(TAG,"path2 " + Constants.getFaceShapeModelPath());
+
         Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.face);
         Bitmap workingBitmap = Bitmap.createBitmap(bm);
-        Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Bitmap mutableBitmap = Bitmap.createScaledBitmap(workingBitmap, (int) workingBitmap.getWidth() / 2, (int) workingBitmap.getHeight() / 2, false);
+        //Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(mutableBitmap);
         List<VisionDetRet> results = faceDet.detect(mutableBitmap);
         Log.d(TAG, "faces " + results.size());
@@ -116,12 +117,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             float resizeRatio = 1.0f;
             String label = ret.getLabel(); // If doing face detection, it will be 'Face'
             Log.d(TAG, "label" + label);
-            Rect bounds = new Rect();
+            /*Rect bounds = new Rect();
             bounds.left = (int) (ret.getLeft() * resizeRatio);
             bounds.top = (int) (ret.getTop() * resizeRatio);
             bounds.right = (int) (ret.getRight() * resizeRatio);
             bounds.bottom = (int) (ret.getBottom() * resizeRatio);
-            canvas.drawRect(bounds, mFaceLandmardkPaint2);
+            canvas.drawRect(bounds, mFaceLandmardkPaint2);*/
             ArrayList<Point> landmarks = ret.getFaceLandmarks();
             Log.d(TAG, "list length" + landmarks.size());
             for (Point point : landmarks) {
@@ -136,32 +137,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         imageView.setImageBitmap(mutableBitmap);
     }
 
-    @NonNull
-    public static final void copyFileFromRawToOthers(@NonNull final Context context, @RawRes int id, @NonNull final String targetPath) {
-        InputStream in = context.getResources().openRawResource(id);
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(targetPath);
-            byte[] buff = new byte[1024];
-            int read = 0;
-            while ((read = in.read(buff)) > 0) {
-                out.write(buff, 0, read);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
     @Override
     public void onCameraViewStarted(int width, int height) {
@@ -187,30 +163,28 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
         }
         catch (CvException e){Log.d("Exception",e.getMessage());}
 
-        FaceDet faceDet = new FaceDet(Constants.getFaceShapeModelPath());
-        Log.d(TAG,"path " + Constants.getFaceShapeModelPath());
+        //Log.d(TAG,"path " + Constants.getFaceShapeModelPath());
 
-        if (!new File(Constants.getFaceShapeModelPath()).exists()) {
-            copyFileFromRawToOthers(this, R.raw.shape_predictor_68_face_landmarks, Constants.getFaceShapeModelPath());
-        }
-        Log.d(TAG,"path2 " + Constants.getFaceShapeModelPath());
+        //Log.d(TAG,"path2 " + Constants.getFaceShapeModelPath());
+
         //Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.face);
         Bitmap workingBitmap = Bitmap.createBitmap(bmp);
-        Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        //Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Bitmap mutableBitmap = Bitmap.createScaledBitmap(workingBitmap, (int) workingBitmap.getWidth() / 4, (int) workingBitmap.getHeight() / 4, false);
         Canvas canvas = new Canvas(mutableBitmap);
         List<VisionDetRet> results = faceDet.detect(mutableBitmap);
         Log.d(TAG, "faces " + results.size());
         for (final VisionDetRet ret : results) {
             Log.d(TAG, "in VisionDet");
-            float resizeRatio = 1.0f;
+            float resizeRatio = 4.0f;
             String label = ret.getLabel(); // If doing face detection, it will be 'Face'
             Log.d(TAG, "label" + label);
-            Rect bounds = new Rect();
+            /*Rect bounds = new Rect();
             bounds.left = (int) (ret.getLeft() * resizeRatio);
             bounds.top = (int) (ret.getTop() * resizeRatio);
             bounds.right = (int) (ret.getRight() * resizeRatio);
             bounds.bottom = (int) (ret.getBottom() * resizeRatio);
-            canvas.drawRect(bounds, mFaceLandmardkPaint2);
+            canvas.drawRect(bounds, mFaceLandmardkPaint2);*/
             ArrayList<Point> landmarks = ret.getFaceLandmarks();
             Log.d(TAG, "list length" + landmarks.size());
             for (Point point : landmarks) {
@@ -218,13 +192,14 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                 int pointY = (int) (point.y * resizeRatio);
                 Log.d(TAG, "x, y " + pointX + " " + pointY);
                 // Get the point of the face landmarks
-                canvas.drawCircle(pointX, pointY, 2, mFaceLandmardkPaint2);
+                //canvas.drawCircle(pointX, pointY, 2, mFaceLandmardkPaint2);
+                Imgproc.circle(originalframe, new org.opencv.core.Point(pointX, pointY), 5, new Scalar(0, 255, 255));
             }
         }
-        Mat matRet = new Mat(originalframe.rows(), originalframe.cols(), originalframe.type());
-        Utils.bitmapToMat(mutableBitmap, matRet);
+        //Mat matRet = new Mat(originalframe.rows(), originalframe.cols(), originalframe.type());
+        //Utils.bitmapToMat(mutableBitmap, matRet);
 
-        return matRet;
+        return originalframe;
     }
 
 }
